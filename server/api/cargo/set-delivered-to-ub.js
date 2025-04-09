@@ -39,6 +39,7 @@ export default defineEventHandler(async (event) => {
           userId = newUser.id
         }
       }
+
       // Hard code status and set current time
       const currentTime = new Date().toISOString()
      

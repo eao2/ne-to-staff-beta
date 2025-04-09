@@ -58,6 +58,14 @@
             </div>
             <span>Ачаа хүлээлгэж өгөх</span>
         </router-link>
+        <router-link to="/register-cargo" class="nav-item">
+            <div class="icon">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM15 11H11V15H9V11H5V9H9V5H11V9H15V11Z" fill="currentColor"/>
+                </svg>
+            </div>
+            <span>Хэрэглэгчгүй карго</span>
+            </router-link>
         </nav>
     </div>
 </template>
