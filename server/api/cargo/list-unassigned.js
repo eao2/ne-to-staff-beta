@@ -7,6 +7,7 @@ export default defineEventHandler(async () => {
       where: {
         userId: null,
         currentStatus: 'DELIVERED_TO_UB',
+        destinationLocationId: process.env.DIVISION_LOCATION_ID
       },
       orderBy: {
         createdAt: 'desc'

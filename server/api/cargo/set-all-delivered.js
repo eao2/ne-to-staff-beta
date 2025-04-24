@@ -29,7 +29,8 @@ export default defineEventHandler(async (event) => {
     const updatedCargos = await prisma.cargoTracking.updateMany({
       where: {
         userId: user.id,
-        currentStatus: 'DELIVERED_TO_UB'
+        currentStatus: 'DELIVERED_TO_UB',
+        destinationLocationId: process.env.DIVISION_LOCATION_ID
       },
       data: {
         currentStatus: 'DELIVERED',

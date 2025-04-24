@@ -46,7 +46,8 @@ export default defineEventHandler(async (event) => {
       const updateData = {
         currentStatus: 'DELIVERED_TO_UB',
         deliveredToUBDate: currentTime,
-        userId
+        userId,
+        destinationLocationId: process.env.DIVISION_LOCATION_ID
       }
       // Update fields only if provided
       if (cargo.price !== undefined) {

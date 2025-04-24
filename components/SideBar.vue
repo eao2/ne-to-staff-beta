@@ -14,6 +14,9 @@
                 </defs>
             </svg>
         </div>
+        <div class="division-info">
+            <h3>Салбар: {{ divisionName }}</h3>
+        </div>
         <nav class="nav-menu">
         <router-link to="/" class="nav-item">
             <div class="icon">
@@ -70,6 +73,13 @@
     </div>
 </template>
 
+<script setup>
+const divisionName = ref('');
+
+const { data } = await useFetch('/api/division/division-name')
+divisionName.value = data.value?.name || ''
+</script>
+
 <style lang="scss">
 $primary-color: #1a73e8;
 $secondary-color: #4285f4;
@@ -100,7 +110,7 @@ $sidebar-width: 280px;
     top: 0;
     width: $sidebar-width;
     height: 100vh;
-    background: #F0F5F5;
+    background: #fff;
     border-right: 1px solid rgba(9, 114, 251, 0.1);
     padding: 24px 0;
 
@@ -117,6 +127,17 @@ $sidebar-width: 280px;
         p {
         color: $secondary-color;
         margin: 4px 0 0;
+        }
+    }
+
+    .division-info {
+        padding: 0 24px;
+        margin-bottom: 1rem;
+        h3 {
+            font-size: 18px;
+            font-weight: 500;
+            color: $text-color;
+            margin: 0;
         }
     }
 

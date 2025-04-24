@@ -28,7 +28,8 @@ export default defineEventHandler(async (event) => {
           price: price !== undefined ? Number(price) : existingCargo.price,
           currentStatus: 'DELIVERED_TO_UB',
           deliveredToUBDate: currentTime,
-          updatedAt: currentTime
+          updatedAt: currentTime,
+          destinationLocationId: process.env.DIVISION_LOCATION_ID
         }
       })
       return { success: true, cargo: updatedCargo }
@@ -42,7 +43,8 @@ export default defineEventHandler(async (event) => {
           currentStatus: 'DELIVERED_TO_UB',
           deliveredToUBDate: currentTime,
           createdAt: currentTime,
-          updatedAt: currentTime
+          updatedAt: currentTime,
+          destinationLocationId: process.env.DIVISION_LOCATION_ID
         }
       })
       return { success: true, cargo: newCargo }

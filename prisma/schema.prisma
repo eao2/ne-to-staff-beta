@@ -1,6 +1,7 @@
 // This is Prisma schema file
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -32,6 +33,53 @@ enum UserType {
   REGISTERED
 }
 
+model DivisionLocation {
+  id                String              @id @default(cuid())
+  name              String
+  country           String
+  city              String?
+  address           String?
+  isActive          Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  originCargos      CargoTracking[]     @relation("OriginLocation")
+  destinationCargos CargoTracking[]     @relation("DestinationLocation")
+  staffMembers      StaffUser[]
+  schedules         DivisionSchedule[]
+}
+
+model DivisionSchedule {
+  id              String           @id @default(cuid())
+  divisionId      String
+  division        DivisionLocation @relation(fields: [divisionId], references: [id])
+
+  dayOfWeek       Int              // 0 = Sunday, 1 = Monday, etc.
+  openTime        String           // "09:00"
+  closeTime       String           // "18:00"
+
+  isClosed        Boolean          @default(false) // Useful for holidays or closed days
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([divisionId])
+  @@unique([divisionId, dayOfWeek])
+}
+
+model StaffUser {
+  id              String           @id @default(cuid())
+  name            String           // Staff member name
+  email           String?          @unique
+  phoneNumber     String?          @unique
+  password        String?
+  divisionId      String?
+  division        DivisionLocation? @relation(fields: [divisionId], references: [id])
+  position        String?          // e.g., "Manager", "Agent", etc.
+  isActive        Boolean          @default(true) // To enable or disable a staff member
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
 model User {
   id            String    @id @default(uuid())
   name          String?
@@ -46,28 +94,37 @@ model User {
 }
 
 model CargoTracking {
-  id                      String        @id @default(uuid())
-  nickname                String?       // User-defined name to identify cargo
-  trackingNumber          String        @unique
-  cargoType               CargoType      @default(NORMAL)
-  price                   Decimal?       @db.Decimal(10, 2)
-  paymentStatus           PaymentStatus  @default(PENDING)
-  
-  preRegisteredDate       DateTime?     // When user added the tracking number
-  receivedAtErenhotDate   DateTime?     // When received at Ereen
-  inTransitDate           DateTime?     // When started transit
-  deliveredToUBDate       DateTime?     // When arrived at UB
-  deliveredDate           DateTime?     // When delivered to final customer
+  id                      String            @id @default(uuid())
+  nickname                String?
+  trackingNumber          String            @unique
+  cargoType               CargoType         @default(NORMAL)
+  price                   Decimal?          @db.Decimal(10, 2)
+  paymentStatus           PaymentStatus     @default(PENDING)
 
-  currentStatus           CargoStatus    @default(PRE_REGISTERED)
+  preRegisteredDate       DateTime?
+  receivedAtErenhotDate   DateTime?
+  inTransitDate           DateTime?
+  deliveredToUBDate       DateTime?
+  deliveredDate           DateTime?
 
-  createdAt               DateTime       @default(now())
-  updatedAt               DateTime       @updatedAt
+  currentStatus           CargoStatus       @default(PRE_REGISTERED)
 
-  // Foreign keys
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+
+  // Foreign key to User
   userId                  String?
-  user                    User?          @relation(fields: [userId], references: [id])
+  user                    User?             @relation(fields: [userId], references: [id])
+
+  // Foreign keys to DivisionLocation
+  originLocationId        String?
+  originLocation          DivisionLocation? @relation("OriginLocation", fields: [originLocationId], references: [id])
+
+  destinationLocationId   String?
+  destinationLocation     DivisionLocation? @relation("DestinationLocation", fields: [destinationLocationId], references: [id])
 
   @@index([trackingNumber])
   @@index([userId])
+  @@index([originLocationId])
+  @@index([destinationLocationId])
 }

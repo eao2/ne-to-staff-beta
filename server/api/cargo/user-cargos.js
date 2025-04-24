@@ -15,9 +15,14 @@ export default defineEventHandler(async (event) => {
 
   try {
     const user = await prisma.user.findUnique({
-      where: { phoneNumber },
+      where: { 
+        phoneNumber
+      },
       include: {
         cargos: {
+          where: {
+            destinationLocationId: process.env.DIVISION_LOCATION_ID
+          },
           orderBy: {
             updatedAt: 'desc'
           },
