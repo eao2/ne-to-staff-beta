@@ -35,7 +35,8 @@ export default defineEventHandler(async (event) => {
         lt: tomorrow
       },
       // paymentStatus: PaymentStatus.PAID,
-      price: { not: null }
+      price: { not: null },
+      destinationLocationId: process.env.DIVISION_LOCATION_ID  // added division filter
     },
     _sum: {
       price: true

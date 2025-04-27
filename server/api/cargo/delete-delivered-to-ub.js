@@ -30,6 +30,13 @@ export default defineEventHandler(async (event) => {
       })
     }
     
+    if (existingCargo.destinationLocationId !== process.env.DIVISION_LOCATION_ID) {
+      throw createError({
+        statusCode: 403,
+        message: 'Access denied: Incorrect division'
+      })
+    }
+    
     // Check if any other date fields exist
     const hasPreviousDates =
       existingCargo.preRegisteredDate ||

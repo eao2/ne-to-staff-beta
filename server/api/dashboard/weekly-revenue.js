@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
           price: true
         }
       })
-  
+
       dates.push(date.toLocaleDateString('mn-MN', { month: 'short', day: 'numeric' }))
       revenues.push(Number(dayRevenue._sum.price || 0))
     }
