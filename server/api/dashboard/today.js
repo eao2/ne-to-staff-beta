@@ -52,7 +52,8 @@ export default defineEventHandler(async (event) => {
           lt: tomorrow
         },
         currentStatus: CargoStatus.DELIVERED,
-        cargoType: CargoType.NORMAL
+        cargoType: CargoType.NORMAL,
+        destinationLocationId: process.env.DIVISION_LOCATION_ID
       }
     }),
     prisma.cargoTracking.count({
@@ -62,7 +63,8 @@ export default defineEventHandler(async (event) => {
           lt: tomorrow
         },
         currentStatus: CargoStatus.DELIVERED,
-        cargoType: CargoType.QUICK
+        cargoType: CargoType.QUICK,
+        destinationLocationId: process.env.DIVISION_LOCATION_ID
       }
     })
   ])
