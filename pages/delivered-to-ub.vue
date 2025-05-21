@@ -322,7 +322,7 @@ input{
 </style>
 
 <script setup>
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, computed, watch, onUnmounted, onMounted } from 'vue'
 
 const phoneNumber = ref('')
 const isExistingUser = ref(false)
@@ -341,8 +341,16 @@ const cargoData = ref({
   price: null
 })
 
+// Remove the direct assignment and use onMounted instead
+onMounted(() => {
+  phoneNumber.value = sessionStorage.getItem('phoneNumber') || ''
+  debouncedSearchUser()
+})
+
 // Create a debounced search function
 function debouncedSearchUser() {
+  sessionStorage.setItem('phoneNumber', phoneNumber.value.trim())
+  
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
@@ -503,6 +511,7 @@ function clearCargoForm() {
 }
 
 function clearUserDataAll() {
+  sessionStorage.setItem('phoneNumber', '')
   phoneNumber.value = ''
   userData.value = {
     phoneNumber: '',

@@ -56,6 +56,7 @@
                         <th>Төрөл</th>
                         <th>Төлөв</th>
                         <th>Үнэ</th>
+                        <th>Хүргэх салбар</th>
                         <th>Сүүлийн Шинэчлэл</th>
                         <th>Үйлдэл</th>
                     </tr>
@@ -67,6 +68,7 @@
                             <td>{{ cargo.cargoType === 'NORMAL' ? 'Энгийн' : 'Шуурхай' }}</td>
                             <td>{{ formatStatus(cargo.currentStatus) }}</td>
                             <td>{{ cargo.price ? `${numberWithCommas(cargo.price)} ₮` : '-' }}</td>
+                            <td>{{ cargo.destinationLocation?.name || '-' }}</td>
                             <td>{{ formatDate(getLatestDate(cargo)) }}</td>
                             <td>
                             <button 
@@ -87,13 +89,14 @@
   </template>
   
   <script setup>
-  import { ref, computed } from 'vue'
+  import { ref, computed, onUnmounted, onMounted } from 'vue'
   
   const phoneNumber = ref('')
   const trackingNumber = ref('')
   const userCargos = ref([])
   const userCargosName = ref('')
   let searchTimeout = null
+
   
   const totalPrice = computed(() => {
     return userCargos.value
@@ -118,8 +121,16 @@
       return statusPriority[a.currentStatus] - statusPriority[b.currentStatus]
     })
   })
+
   
+  onMounted(() => {
+    phoneNumber.value = sessionStorage.getItem('phoneNumber') || ''
+    debouncedSearchUser()
+  })
+
   function debouncedSearchUser() {
+  sessionStorage.setItem('phoneNumber', phoneNumber.value.trim())
+  
     if (searchTimeout) {
       clearTimeout(searchTimeout)
     }
@@ -251,6 +262,8 @@
     trackingNumber.value = ''
     userCargos.value = []
     userCargosName.value = ''
+    
+    sessionStorage.setItem('phoneNumber', '')
   }
   
   onUnmounted(() => {
