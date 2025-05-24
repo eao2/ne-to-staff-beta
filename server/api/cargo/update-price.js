@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
     console.error('Error updating price:', error)
     throw createError({
       statusCode: 500,
-      message: 'Алдаа гарлаа, дахин оролдоно уу!'
+      message: 'Үнийг шинэчлэхэд алдаа гарлаа!'
     })
   }
 })

@@ -40,7 +40,20 @@
               <td>{{ cargoData.nickname || '-' }}</td>
               <td>{{ cargoData.cargoType === 'NORMAL' ? 'Энгийн' : 'Шуурхай' }}</td>
               <td>{{ formatStatus(cargoData.currentStatus) }}</td>
-              <td>{{ cargoData.price ? `${numberWithCommas(cargoData.price)} ₮` : '-' }}</td>
+              <td>
+                <div v-if="editingPrice" class="price-edit">
+                  <input 
+                    type="number" 
+                    v-model="tempPrice" 
+                    @keyup.enter="updatePrice"
+                  />
+                  <button @click="updatePrice" class="btn-save">💾</button>
+                  <button @click="cancelEdit" class="btn-cancel">✖</button>
+                </div>
+                <div v-else @click="startEdit" class="price-display">
+                  {{ cargoData.price ? `${numberWithCommas(cargoData.price)} ₮` : '-' }}
+                </div>
+              </td>
               <td>{{ formatPaymentStatus(cargoData.paymentStatus) }}</td>
               <td>{{ cargoData.destinationLocation?.name || '-' }}</td>
             </tr>
@@ -88,6 +101,8 @@ import { ref } from 'vue'
 
 const trackingNumber = ref('')
 const cargoData = ref(null)
+const editingPrice = ref(false)
+const tempPrice = ref(null)
 
 function formatStatus(status) {
   const statusMap = {
@@ -141,6 +156,35 @@ async function searchCargo() {
 function clearSearch() {
   trackingNumber.value = ''
   cargoData.value = null
+}
+
+function startEdit() {
+  editingPrice.value = true
+  tempPrice.value = cargoData.value.price
+}
+
+function cancelEdit() {
+  editingPrice.value = false
+  tempPrice.value = null
+}
+
+async function updatePrice() {
+  try {
+    const response = await $fetch('/api/cargo/update-price', {
+      method: 'POST',
+      body: {
+        trackingNumber: cargoData.value.trackingNumber,
+        price: tempPrice.value
+      }
+    })
+    
+    cargoData.value.price = tempPrice.value
+    editingPrice.value = false
+    tempPrice.value = null
+  } catch (error) {
+    console.error('Error updating price:', error)
+    alert('Үнийг шинэчлэхэд алдаа гарлаа!')
+  }
 }
 </script>
 
@@ -233,6 +277,23 @@ input {
       color: $text-color;
       background-color: rgba($primary-color, 0.05);
     }
+
+    // Add fixed widths for main table cells
+    &:first-of-type {
+      th:nth-child(1), td:nth-child(1) { width: 15%; } // Трак Код
+      th:nth-child(2), td:nth-child(2) { width: 15%; } // Нэр
+      th:nth-child(3), td:nth-child(3) { width: 10%; } // Төрөл
+      th:nth-child(4), td:nth-child(4) { width: 15%; } // Төлөв
+      th:nth-child(5), td:nth-child(5) { width: 15%; } // Үнэ
+      th:nth-child(6), td:nth-child(6) { width: 15%; } // Төлбөрийн төлөв
+      th:nth-child(7), td:nth-child(7) { width: 15%; } // Хүргэсэн салбар
+    }
+
+    // Add fixed widths for status history table
+    &:last-of-type {
+      th:nth-child(1), td:nth-child(1) { width: 40%; } // Төлөв
+      th:nth-child(2), td:nth-child(2) { width: 60%; } // Огноо
+    }
   }
 }
 
@@ -243,6 +304,50 @@ input {
 
   &:hover {
     filter: brightness(0.9)
+  }
+}
+
+.price-edit {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  input {
+    max-width: 8rem;
+    height: 2rem;
+    border-radius: 8px;
+    border: 1px solid $border-color;
+    color: $text-color;
+    padding: 4px 8px;
+    background-color: #ffffff;
+  }
+
+  .btn-save, .btn-cancel {
+    @include button-base;
+    padding: 4px 8px;
+    background-color: transparent;
+    
+    &:hover {
+      background-color: rgba($primary-color, 0.1);
+    }
+  }
+
+  .btn-save {
+    color: $secondary-color;
+  }
+
+  .btn-cancel {
+    color: $danger-color;
+  }
+}
+
+.price-display {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
   }
 }
 </style>
