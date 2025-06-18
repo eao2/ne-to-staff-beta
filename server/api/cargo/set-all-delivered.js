@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
       where: {
         userId: user.id,
         currentStatus: 'DELIVERED_TO_UB',
-        destinationLocationId: process.env.DIVISION_LOCATION_ID
+        destinationLocationId: event.context.auth.divisionId
       },
       data: {
         currentStatus: 'DELIVERED',

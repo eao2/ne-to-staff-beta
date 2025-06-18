@@ -15,7 +15,8 @@
             </svg>
         </div>
         <div class="division-info">
-            <h3>Салбар: {{ divisionName }}</h3>
+            <h3>{{ staffUser?.division?.name || 'Loading...' }}</h3>
+            <p class="staff-name">{{ staffUser?.name }}</p>
         </div>
         <nav class="nav-menu">
         <router-link to="/" class="nav-item">
@@ -112,14 +113,34 @@
             <span>Огноогоор шүүх</span>
         </router-link>
         </nav>
+        <button class="logout-btn" @click="logout">Гарах</button>
     </div>
 </template>
 
 <script setup>
-const divisionName = ref('');
+import { useRouter } from 'vue-router'
+const staffUser = ref(null)
+const router = useRouter()
 
-const { data } = await useFetch('/api/division/division-name')
-divisionName.value = data.value?.name || ''
+onMounted(async () => {
+  try {
+    staffUser.value = await $fetch('/api/auth/me')
+  } catch (error) {
+    console.error('Error fetching user info:', error)
+  }
+})
+
+async function logout() {
+  try {
+    await $fetch('/api/auth/login', {
+      method: 'POST',
+      body: { logout: true }
+    })
+    router.push('/login')
+  } catch (e) {
+    router.push('/login')
+  }
+}
 </script>
 
 <style lang="scss">
@@ -181,6 +202,12 @@ $sidebar-width: 280px;
             color: $text-color;
             margin: 0;
         }
+        .staff-name {
+            font-size: 14px;
+            font-weight: 400;
+            color: darken($text-color, 10%);
+            margin: 4px 0 0;
+        }
     }
 
     .nav-menu {
@@ -216,6 +243,22 @@ $sidebar-width: 280px;
             height: 24px;
             margin-right: 12px;
         }
+        }
+    }
+
+    .logout-btn {
+        width: calc(100% - 48px);
+        margin: 24px 24px 0 24px;
+        padding: 10px 0;
+        background: $primary-color;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+        &:hover {
+            background: darken($primary-color, 10%);
         }
     }
 }

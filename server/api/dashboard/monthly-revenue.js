@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
           currentStatus: CargoStatus.DELIVERED,
           paymentStatus: PaymentStatus.PAID,
           price: { not: null },
-          destinationLocationId: process.env.DIVISION_LOCATION_ID
+          destinationLocationId: event.context.auth.divisionId
         },
         _sum: {
           price: true

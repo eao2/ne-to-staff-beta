@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { startDate, endDate, status } = body
 
-  const divisionLocationId = process.env.DIVISION_LOCATION_ID
+  const divisionLocationId = event.context.auth.divisionId
   if (!divisionLocationId) {
     throw createError({ statusCode: 500, message: 'DIVISION_LOCATION_ID is not set in environment variables.' })
   }

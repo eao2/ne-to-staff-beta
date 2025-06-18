@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
       include: {
         cargos: {
           where: {
-            destinationLocationId: process.env.DIVISION_LOCATION_ID
+            destinationLocationId: event.context.auth.divisionId
           },
           orderBy: {
             updatedAt: 'desc'

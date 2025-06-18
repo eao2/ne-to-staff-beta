@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
           currentStatus: 'DELIVERED_TO_UB',
           deliveredToUBDate: currentTime,
           updatedAt: currentTime,
-          destinationLocationId: process.env.DIVISION_LOCATION_ID
+          destinationLocationId: event.context.auth.divisionId
         }
       })
       return { success: true, cargo: updatedCargo }
@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
           deliveredToUBDate: currentTime,
           createdAt: currentTime,
           updatedAt: currentTime,
-          destinationLocationId: process.env.DIVISION_LOCATION_ID
+          destinationLocationId: event.context.auth.divisionId
         }
       })
       return { success: true, cargo: newCargo }

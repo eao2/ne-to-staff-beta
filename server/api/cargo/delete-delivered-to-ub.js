@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
       })
     }
     
-    if (existingCargo.destinationLocationId !== process.env.DIVISION_LOCATION_ID) {
+    if (existingCargo.destinationLocationId !== event.context.auth.divisionId) {
       throw createError({
         statusCode: 403,
         message: 'Access denied: Incorrect division'

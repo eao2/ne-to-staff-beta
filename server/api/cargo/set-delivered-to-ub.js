@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
         currentStatus: 'DELIVERED_TO_UB',
         deliveredToUBDate: currentTime,
         userId,
-        destinationLocationId: process.env.DIVISION_LOCATION_ID
+        destinationLocationId: event.context.auth.divisionId
       }
       // Update fields only if provided
       if (cargo.price !== undefined) {

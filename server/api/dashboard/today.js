@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
       currentStatus: CargoStatus.DELIVERED,
       paymentStatus: PaymentStatus.PAID,
       price: { not: null },
-      destinationLocationId: process.env.DIVISION_LOCATION_ID
+      destinationLocationId: event.context.auth.divisionId
     },
     _sum: {
       price: true
@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
       },
       // paymentStatus: PaymentStatus.PAID,
       price: { not: null },
-      destinationLocationId: process.env.DIVISION_LOCATION_ID  // added division filter
+      destinationLocationId: event.context.auth.divisionId  // added division filter
     },
     _sum: {
       price: true
@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
         },
         currentStatus: CargoStatus.DELIVERED,
         cargoType: CargoType.NORMAL,
-        destinationLocationId: process.env.DIVISION_LOCATION_ID
+        destinationLocationId: event.context.auth.divisionId
       }
     }),
     prisma.cargoTracking.count({
@@ -64,7 +64,7 @@ export default defineEventHandler(async (event) => {
         },
         currentStatus: CargoStatus.DELIVERED,
         cargoType: CargoType.QUICK,
-        destinationLocationId: process.env.DIVISION_LOCATION_ID
+        destinationLocationId: event.context.auth.divisionId
       }
     })
   ])
