@@ -1,0 +1,201 @@
+// This is Prisma schema file
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum CargoType {
+  QUICK
+  NORMAL
+}
+
+enum CargoStatus {
+  PRE_REGISTERED
+  RECEIVED_AT_ERENHOT
+  IN_TRANSIT
+  DELIVERED_TO_UB
+  DELIVERED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  PARTIALLY_PAID
+}
+
+enum UserType {
+  TEMPORARY
+  REGISTERED
+}
+
+enum DeliveryRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model DivisionLocation {
+  id                String              @id @default(cuid())
+  name              String
+  country           String
+  city              String?
+  address           String?
+  isActive          Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  originCargos      CargoTracking[]     @relation("OriginLocation")
+  destinationCargos CargoTracking[]     @relation("DestinationLocation")
+  staffMembers      StaffUser[]
+  schedules         DivisionSchedule[]
+}
+
+model DivisionSchedule {
+  id              String           @id @default(cuid())
+  divisionId      String
+  division        DivisionLocation @relation(fields: [divisionId], references: [id])
+  dayOfWeek       Int              // 0 = Sunday, 1 = Monday, etc.
+  openTime        String           // "09:00"
+  closeTime       String           // "18:00"
+  isClosed        Boolean          @default(false) // Useful for holidays or closed days
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  @@index([divisionId])
+  @@unique([divisionId, dayOfWeek])
+}
+
+model StaffUser {
+  id              String           @id @default(cuid())
+  name            String           // Staff member name
+  email           String?          @unique
+  phoneNumber     String?          @unique
+  password        String?
+  divisionId      String?
+  division        DivisionLocation? @relation(fields: [divisionId], references: [id])
+  position        String?          // e.g., "Manager", "Agent", etc.
+  isActive        Boolean          @default(true) // To enable or disable a staff member
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  // New relations
+  deliveryRequests DeliveryRequest[]
+}
+
+model User {
+  id                    String    @id @default(uuid())
+  name                  String?
+  phoneNumber           String    @unique
+  email                 String?   @unique
+  emailVerified         Boolean   @default(false)
+  password              String?
+  userType              UserType  @default(TEMPORARY)
+  autoDeliveryRequest   Boolean   @default(false) // NEW FIELD
+  
+  // Default delivery address relation
+  defaultDeliveryAddressId String? @unique
+  defaultDeliveryAddress   DeliveryAddress? @relation("DefaultDeliveryAddress", fields: [defaultDeliveryAddressId], references: [id])
+  
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  cargos                CargoTracking[]
+  deliveryRequests      DeliveryRequest[]
+  deliveryAddresses     DeliveryAddress[] @relation("UserDeliveryAddresses")
+}
+
+// DeliveryAddress model with simple string fields
+model DeliveryAddress {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation("UserDeliveryAddresses", fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Simple string fields for location
+  provinceOrCity      String   // Province/City name
+  district            String   // District name  
+  subDistrict         String   // Sub-district name
+  detailedLocation    String   @db.Text // Specific address details (larger text field)
+  contactPhone        String   // Phone number for this address
+  addressLabel        String?  // User-friendly label like "Home", "Office"
+  description         String?  // Additional notes or instructions
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  deliveryRequests    DeliveryRequest[]
+  // Reverse relation for default address
+  defaultForUser      User?    @relation("DefaultDeliveryAddress")
+
+  @@index([userId])
+  @@index([provinceOrCity])
+  @@index([district])
+}
+
+model CargoTracking {
+  id                      String            @id @default(uuid())
+  nickname                String?
+  trackingNumber          String            @unique
+  cargoType               CargoType         @default(NORMAL)
+  price                   Decimal?          @db.Decimal(10, 2)
+  paymentStatus           PaymentStatus     @default(PENDING)
+  isUserLabelPrinted      Boolean?
+  preRegisteredDate       DateTime?
+  receivedAtErenhotDate   DateTime?
+  inTransitDate           DateTime?
+  deliveredToUBDate       DateTime?
+  deliveredDate           DateTime?
+  currentStatus           CargoStatus       @default(PRE_REGISTERED)
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+  // Foreign key to User
+  userId                  String?
+  user                    User?             @relation(fields: [userId], references: [id])
+  // Foreign keys to DivisionLocation
+  originLocationId        String?
+  originLocation          DivisionLocation? @relation("OriginLocation", fields: [originLocationId], references: [id])
+  destinationLocationId   String?
+  destinationLocation     DivisionLocation? @relation("DestinationLocation", fields: [destinationLocationId], references: [id])
+  
+  // New relations
+  deliveryRequests        DeliveryRequest[]
+  
+  @@index([trackingNumber])
+  @@index([userId])
+  @@index([originLocationId])
+  @@index([destinationLocationId])
+}
+
+// New DeliveryRequest model
+model DeliveryRequest {
+  id                    String                @id @default(cuid())
+  cargoId               String
+  cargo                 CargoTracking         @relation(fields: [cargoId], references: [id])
+  
+  // Requester information
+  requestedByUserId     String?
+  requestedByUser       User?                 @relation(fields: [requestedByUserId], references: [id])
+  
+  // Delivery address (reusable)
+  deliveryAddressId     String
+  deliveryAddress       DeliveryAddress       @relation(fields: [deliveryAddressId], references: [id])
+  
+  price                 Decimal?              @db.Decimal(10, 2) // Delivery price
+  requestDescription    String?               @db.Text
+  status                DeliveryRequestStatus @default(PENDING)
+  
+  // Staff response
+  reviewedByStaffId     String?
+  reviewedByStaff       StaffUser?            @relation(fields: [reviewedByStaffId], references: [id])
+  staffResponse         String?               @db.Text
+  reviewedAt            DateTime?
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  @@index([cargoId])
+  @@index([requestedByUserId])
+  @@index([deliveryAddressId])
+  @@index([reviewedByStaffId])
+  @@index([status, createdAt])
+}
