@@ -183,8 +183,8 @@
                    <button v-if="cargo.requestStatus === 'PENDING'" @click="rejectRequest(cargo.requestId)" class="btn btn-red">Татгалзах</button>
                    <button v-if="cargo.requestStatus === 'APPROVED'" @click="markDelivered(cargo.requestId)" class="btn btn-blue">Хүргэгдсэн</button>
                    <button @click="showResponseModal({ id: cargo.requestId, status: cargo.requestStatus })" class="btn btn-secondary">Хариулт</button>
-                   <p class="debug-info">Request Status: {{ cargo.requestStatus }}</p>
-                   <p class="debug-info">Request ID: {{ cargo.requestId }}, Status: {{ cargo.requestStatus }}</p>
+                   <!-- <p class="debug-info">Request Status: {{ cargo.requestStatus }}</p>
+                   <p class="debug-info">Request ID: {{ cargo.requestId }}, Status: {{ cargo.requestStatus }}</p> -->
                  </div>
                </div>
              </div>
@@ -203,7 +203,7 @@
                      <p class="cargo-status">{{ getCargoStatusText(cargo.currentStatus) }}</p>
                      <p v-if="cargo.nickname" class="cargo-nickname">{{ cargo.nickname }}</p>
                      <p class="cargo-price">{{ formatPrice(cargo.price) }}</p>
-                     <p class="debug-info">Request: {{ cargo.requestStatus }}</p>
+                     <!-- <p class="debug-info">Request: {{ cargo.requestStatus }}</p> -->
                    </div>
                  </div>
 
