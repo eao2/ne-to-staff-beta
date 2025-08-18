@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
         status: 'APPROVED',
         staffResponse: staffResponse || null,
         reviewedAt: new Date(),
-        reviewedByStaffId: event.context.user?.id // Assuming user context is available
+        reviewedByStaffId: event.context.auth?.userId // Staff user from auth middleware
       },
       include: {
         cargo: {

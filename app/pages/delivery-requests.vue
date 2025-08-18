@@ -118,11 +118,28 @@
                <span class="badge badge-blue">{{ addressGroup.approvableCargos.length }} хүлээн авах боломжтой</span>
                <span class="badge badge-yellow">{{ addressGroup.nonApprovableCargos.length }} хүлээгдэж буй</span>
              </div>
+             <div class="total-price">
+               <span class="badge badge-blue">Нийт: {{ formatPrice(addressGroup.totalPrice) }}</span>
+             </div>
            </div>
          </div>
 
          <!-- Delivery Address -->
          <div class="request-body">
+           <!-- Debug Info -->
+           <!-- <div class="debug-section">
+             <p>Debug: Total={{ addressGroup.totalCargos }}, Approvable={{ addressGroup.approvableCargos.length }}, Non-Approvable={{ addressGroup.nonApprovableCargos.length }}</p>
+             <button @click="testMarkDelivered(addressGroup.cargos[0]?.requestId)" class="btn btn-secondary" style="margin-top: 0.5rem;">Test Mark Delivered</button>
+             <div style="margin-top: 0.5rem; font-size: 0.7rem;">
+               <p>All Cargos:</p>
+               <ul>
+                 <li v-for="cargo in addressGroup.cargos" :key="cargo.id">
+                   {{ cargo.trackingNumber }} - Status: {{ cargo.currentStatus }} - Request: {{ cargo.requestStatus }}
+                 </li>
+               </ul>
+             </div>
+           </div>
+            -->
            <div class="address-block">
              <h4>Хүргэх хаяг</h4>
              <div class="address">
@@ -155,6 +172,8 @@
                      <p class="tracking-number">{{ cargo.trackingNumber }}</p>
                      <p class="cargo-status">{{ getCargoStatusText(cargo.currentStatus) }}</p>
                      <p v-if="cargo.nickname" class="cargo-nickname">{{ cargo.nickname }}</p>
+                     <p class="cargo-price">{{ formatPrice(cargo.price) }}</p>
+                     <p class="debug-info">Request: {{ cargo.requestStatus }}</p>
                    </div>
                  </div>
 
@@ -164,6 +183,8 @@
                    <button v-if="cargo.requestStatus === 'PENDING'" @click="rejectRequest(cargo.requestId)" class="btn btn-red">Татгалзах</button>
                    <button v-if="cargo.requestStatus === 'APPROVED'" @click="markDelivered(cargo.requestId)" class="btn btn-blue">Хүргэгдсэн</button>
                    <button @click="showResponseModal({ id: cargo.requestId, status: cargo.requestStatus })" class="btn btn-secondary">Хариулт</button>
+                   <p class="debug-info">Request Status: {{ cargo.requestStatus }}</p>
+                   <p class="debug-info">Request ID: {{ cargo.requestId }}, Status: {{ cargo.requestStatus }}</p>
                  </div>
                </div>
              </div>
@@ -181,12 +202,17 @@
                      <p class="tracking-number">{{ cargo.trackingNumber }}</p>
                      <p class="cargo-status">{{ getCargoStatusText(cargo.currentStatus) }}</p>
                      <p v-if="cargo.nickname" class="cargo-nickname">{{ cargo.nickname }}</p>
+                     <p class="cargo-price">{{ formatPrice(cargo.price) }}</p>
+                     <p class="debug-info">Request: {{ cargo.requestStatus }}</p>
                    </div>
                  </div>
 
                  <!-- Status Only (No Actions) -->
                  <div class="cargo-status-display">
                    <span class="badge badge-yellow">Хүлээгдэж буй</span>
+                   <button v-if="cargo.requestStatus === 'APPROVED'" @click="markDelivered(cargo.requestId)" class="btn btn-blue">Хүргэгдсэн</button>
+                   <!-- <p class="debug-info">Button should show if: {{ cargo.requestStatus }} === 'APPROVED' = {{ cargo.requestStatus === 'APPROVED' }}</p>
+                   <p class="debug-info">Request ID: {{ cargo.requestId }}, Status: {{ cargo.requestStatus }}</p> -->
                  </div>
                </div>
              </div>
@@ -323,6 +349,10 @@ const fetchDeliveryRequests = async () => {
     })
     const data = await response.json()
     
+    // Debug: Log the API response structure
+    console.log('API Response:', data)
+    console.log('First request sample:', data.data[0])
+    
     // Group delivery requests by address
     const groupedRequests = groupRequestsByAddress(data.data)
     deliveryRequests.value = groupedRequests
@@ -361,7 +391,8 @@ const groupRequestsByAddress = (requests) => {
         cargos: [],
         approvableCargos: [],
         nonApprovableCargos: [],
-        totalCargos: 0
+        totalCargos: 0,
+        totalPrice: 0
       }
     }
     
@@ -387,7 +418,14 @@ const groupRequestsByAddress = (requests) => {
       groups[addressKey].nonApprovableCargos.push(cargoData)
     }
     
+    // Debug logging
+    console.log(`Cargo ${cargoData.trackingNumber}: status=${cargoData.currentStatus}, requestStatus=${cargoData.requestStatus}`)
+    
     groups[addressKey].totalCargos++
+
+    // Sum price (handle Decimal string/number/null)
+    const priceNumber = cargoData.price ? Number(cargoData.price) : 0
+    groups[addressKey].totalPrice += isNaN(priceNumber) ? 0 : priceNumber
   })
   
   return Object.values(groups)
@@ -498,6 +536,12 @@ const getCargoStatusText = (status) => {
     DELIVERED: 'Хүргэгдсэн'
   }
   return texts[status] || status
+}
+
+const formatPrice = (value) => {
+  const num = value ? Number(value) : 0
+  if (isNaN(num)) return '₮0'
+  return `₮${num.toLocaleString('mn-MN')}`
 }
 
 const formatAddress = (address) => {
@@ -617,6 +661,21 @@ const changePage = (page) => {
 
 const refreshData = () => {
   fetchDeliveryRequests()
+}
+
+// Test function for manual markDelivered
+const testMarkDelivered = async (requestId) => {
+  if (!requestId) {
+    console.warn('No requestId provided for testMarkDelivered')
+    return
+  }
+  try {
+    await markDelivered(requestId)
+    console.log(`Manually marked request ${requestId} as delivered.`)
+    await fetchDeliveryRequests()
+  } catch (error) {
+    console.error('Error testing markDelivered:', error)
+  }
 }
 </script>
 
@@ -860,7 +919,7 @@ $sidebar-width: 280px;
       }
     }
 
-         .status-section {
+      .status-section {
        display: flex;
        align-items: center;
        gap: 1rem;
@@ -869,7 +928,6 @@ $sidebar-width: 280px;
          display: flex;
          align-items: center;
          gap: 0.5rem;
-         font-size: 0.875rem;
          color: $text-light;
        }
 
@@ -877,11 +935,28 @@ $sidebar-width: 280px;
          display: flex;
          gap: 0.5rem;
        }
+       .total-price {
+         display: flex;
+         align-items: center;
+         gap: 0.5rem;
+         color: $text-light;
+       }
      }
   }
 
        .request-body {
        padding: 1rem;
+
+    .debug-section {
+      background: $muted-bg;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      border: 1px solid $border-color;
+      font-size: 0.75rem;
+      color: $text-light;
+      font-family: monospace;
+    }
 
     .address-block, .cargo-block {
       margin-bottom: 1.5rem;
@@ -992,6 +1067,13 @@ $sidebar-width: 280px;
            margin: 0;
            font-style: italic;
          }
+         
+         .debug-info {
+           font-size: 0.7rem;
+           color: #999;
+           margin: 0;
+           font-family: monospace;
+         }
        }
 
        .cargo-actions {
@@ -1086,7 +1168,7 @@ $sidebar-width: 280px;
 .badge {
   padding: 0.25rem 0.5rem;
   border-radius: 6px;
-  font-size: 0.75rem;
+  font-size: 1rem;
   font-weight: 500;
 
   &.badge-green {

@@ -14,6 +14,9 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    var date = new Date()
+    date = date.toISOString() 
+
     // First check if the delivery request is approved
     const deliveryRequest = await prisma.deliveryRequest.findUnique({
       where: { id: requestId },
@@ -35,11 +38,11 @@ export default defineEventHandler(async (event) => {
     }
 
     // Update only the cargo status to DELIVERED
-    const updatedCargo = await prisma.cargoTracking.update({
+    await prisma.cargoTracking.update({
       where: { id: deliveryRequest.cargoId },
       data: {
         currentStatus: 'DELIVERED',
-        deliveredDate: new Date()
+        deliveredDate: date
       }
     })
 

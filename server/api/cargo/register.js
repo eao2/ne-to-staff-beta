@@ -3,39 +3,31 @@ const prisma = new PrismaClient()
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const { cargoId, status } = body
+  const { trackingNumber, cargoType, price } = body
+
+  const status='DELIVERED_TO_UB'
+  var date = new Date()
+  date = date.toISOString()
 
   // Step 1: Upsert cargo with isUserLabelPrinted = false by default
   let cargo = await prisma.cargoTracking.upsert({
-    where: { id: cargoId },
+    where: { trackingNumber: trackingNumber },
     update: {
       currentStatus: status,
-      isUserLabelPrinted: false
+      isUserLabelPrinted: false,
+      cargoType: cargoType,
+      price: price,
+      destinationLocationId: event.context.auth.divisionId,
+      deliveredToUBDate: date,
     },
     create: {
-      id: cargoId,
+      trackingNumber: trackingNumber,
       currentStatus: status,
-      isUserLabelPrinted: false
-    },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          phoneNumber: true,
-          email: true,
-          autoDeliveryRequest: true,
-          defaultDeliveryRequestAddress: {
-            select: {
-              id: true,
-              label: true,
-              addressLine: true,
-              city: true,
-              region: true
-            }
-          }
-        }
-      }
+      cargoType: cargoType,
+      price: price,
+      isUserLabelPrinted: false,
+      destinationLocationId: event.context.auth.divisionId,
+      deliveredToUBDate: date,
     }
   })
 
