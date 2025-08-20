@@ -207,8 +207,13 @@ async function deleteCargo(cargo) {
         trackingNumber: cargo.trackingNumber
       })
     })
+
+    // console.log('Delete response:', response)
+
+    response.ok
+      ? message.value = 'Cargo deleted successfully!'
+      : message.value = 'Error deleting cargo: ' + response.statusText
     await fetchCargos()
-    message.value = 'Cargo deleted successfully!'
   } catch (error) {
     console.error('Error deleting cargo:', error)
     message.value = 'Error deleting cargo: ' + error.message
