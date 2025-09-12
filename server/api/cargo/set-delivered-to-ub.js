@@ -1,5 +1,7 @@
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
+// import { PrismaClient } from '@prisma/client'
+// const prisma = new PrismaClient()
+import prisma from '../../utils/prisma.js'
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { trackingNumber, cargo = {}, user: userInBody } = body

@@ -1,6 +1,7 @@
-import { PrismaClient, CargoStatus, CargoType, PaymentStatus } from '@prisma/client'
+// import { PrismaClient, CargoStatus, CargoType, PaymentStatus } from '@prisma/client'
 
-const prisma = new PrismaClient()
+// const prisma = new PrismaClient()
+import prisma from '../../utils/prisma.js'
 
 export default defineEventHandler(async (event) => {
     // Get the start of 6 months ago
@@ -24,8 +25,8 @@ export default defineEventHandler(async (event) => {
             gte: monthStart,
             lt: monthEnd
           },
-          currentStatus: CargoStatus.DELIVERED,
-          paymentStatus: PaymentStatus.PAID,
+          currentStatus: 'DELIVERED',
+          paymentStatus: 'PAID',
           price: { not: null },
           destinationLocationId: event.context.auth.divisionId
         },

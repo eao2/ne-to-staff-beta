@@ -1,6 +1,7 @@
-import { PrismaClient, CargoStatus, CargoType, PaymentStatus } from '@prisma/client'
+// import { PrismaClient, CargoStatus, CargoType, PaymentStatus } from '@prisma/client'
 
-const prisma = new PrismaClient()
+// const prisma = new PrismaClient()
+import prisma from '../../utils/prisma.js'
 
 export default defineEventHandler(async (event) => {
   const today = new Date()
@@ -16,8 +17,8 @@ export default defineEventHandler(async (event) => {
         gte: today,
         lt: tomorrow
       },
-      currentStatus: CargoStatus.DELIVERED,
-      paymentStatus: PaymentStatus.PAID,
+      currentStatus: 'DELIVERED',
+      paymentStatus: 'PAID',
       price: { not: null },
       destinationLocationId: event.context.auth.divisionId
     },
@@ -51,8 +52,8 @@ export default defineEventHandler(async (event) => {
           gte: today,
           lt: tomorrow
         },
-        currentStatus: CargoStatus.DELIVERED,
-        cargoType: CargoType.NORMAL,
+        currentStatus: 'DELIVERED',
+        cargoType: 'NORMAL',
         destinationLocationId: event.context.auth.divisionId
       }
     }),
@@ -62,8 +63,8 @@ export default defineEventHandler(async (event) => {
           gte: today,
           lt: tomorrow
         },
-        currentStatus: CargoStatus.DELIVERED,
-        cargoType: CargoType.QUICK,
+        currentStatus: 'DELIVERED',
+        cargoType: 'QUICK',
         destinationLocationId: event.context.auth.divisionId
       }
     })
