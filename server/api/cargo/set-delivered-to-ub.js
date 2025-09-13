@@ -112,7 +112,5 @@ export default defineEventHandler(async (event) => {
       statusCode: 500,
       message: 'Error saving cargo information'
     })
-  } finally {
-    await prisma.$disconnect()
   }
 })

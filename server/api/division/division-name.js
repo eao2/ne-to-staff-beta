@@ -7,7 +7,6 @@ export default defineEventHandler(async (event) => {
   const divisionId = event.context.auth.divisionId
 
   if (!divisionId) {
-    await prisma.$disconnect()
     throw createError({
       statusCode: 500,
       statusMessage: 'DIVISION_LOCATION_ID not set in environment variables'
@@ -37,7 +36,5 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Error fetching division',
       data: error.message
     })
-  } finally {
-    await prisma.$disconnect()
   }
 })
