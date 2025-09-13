@@ -2,7 +2,7 @@ module.exports = { apps: [
     { name: 'ne-to-staff-beta',
         script: './.output/server/index.mjs',
         exec_mode: 'cluster',
-        instances: 'max',
+        instances: '1',
         env: {
             PORT: 4100,
             NITRO_PORT: 4100,
