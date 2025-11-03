@@ -39,9 +39,13 @@
           </div>
           
           <div class="user-info-row">
-            <h3 class="user-name">{{ userCargosName }}</h3>
-            <h3 class="total-price" v-if="totalPrice > 0">Нийт Дүн: {{ numberWithCommas(totalPrice) }}₮</h3>
-            <h3 class="delivered-count" v-if="deliveredCount > 0">УБ-д ирсэн: {{ deliveredCount }}</h3>
+            <h2 class="user-name">{{ userCargosName }}</h2>
+            <h3 class="total-price" v-if="totalPrice > 0">
+              Нийт Дүн: <b>{{ numberWithCommas(totalPrice) }}₮</b>
+            </h3>
+            <h3 class="delivered-count" v-if="deliveredCount > 0">
+              УБ-д ирсэн: <b>{{ deliveredCount }}</b>
+            </h3>
             <button
                 @click="setAllDelivered" 
                 class="btn-deliver-all"
@@ -50,6 +54,7 @@
                 Бүх Карго Авсан
             </button>
           </div>
+
         </div>
   
         <div v-if="userCargos.length > 0" class="cargos-table-container">
@@ -354,24 +359,21 @@ async function setDelivered() {
 .user-info-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
   align-items: center;
-  margin: 0.5rem 1rem;
-  
+  padding: 1rem;
   .user-name {
+    font-size: 1.2rem;
     font-weight: 600;
     margin: 0;
   }
-  
-  .total-price, .delivered-count {
+
+  .total-price,
+  .delivered-count {
+    font-size: 1rem;
     font-weight: 500;
     margin: 0;
-    justify-self: end;
   }
   
-  .btn-deliver-all {
-    justify-self: end;
-  }
 }
 
 // Table Styles

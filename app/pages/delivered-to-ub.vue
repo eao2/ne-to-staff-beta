@@ -98,9 +98,13 @@
         </form>
         
         <div class="user-info-row">
-          <h3 class="user-name">{{ userCargosName }}</h3>
-          <h3 class="total-price" v-if="totalPrice > 0">Нийт Дүн: {{ numberWithCommas(totalPrice) }}₮</h3>
-          <h3 class="delivered-count" v-if="deliveredCount > 0">УБ-д ирсэн: {{ deliveredCount }}</h3>
+          <h2 class="user-name">{{ userCargosName }}</h2>
+          <h3 class="total-price" v-if="totalPrice > 0">
+            Нийт Дүн: <b>{{ numberWithCommas(totalPrice) }}₮</b>
+          </h3>
+          <h3 class="delivered-count" v-if="deliveredCount > 0">
+            УБ-д ирсэн: <b>{{ deliveredCount }}</b>
+          </h3>
         </div>
       </div>
 
@@ -254,26 +258,21 @@ input{
 }
 
 .user-info-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-
-  margin: 1rem;
-  
+  padding: 1rem;
   .user-name {
+    font-size: 1.2rem;
     font-weight: 600;
     margin: 0;
   }
-  
-  .stats-container {
-    display: flex;
-    gap: 1.5rem;
-    
-    .total-price, .delivered-count {
-      font-weight: 500;
-      margin: 0;
-    }
+
+  .total-price,
+  .delivered-count {
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0;
   }
 }
 
