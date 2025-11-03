@@ -160,7 +160,7 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .cargo-management{
-  margin-left: 17.5rem;
+  margin-left: 80px;
 }
 
 .stats-container{

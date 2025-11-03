@@ -2,44 +2,46 @@
     <div class="cargo-management">
       <SideBar />
       <div class="main-content">
-        <div class="search-section">
-          <div class="search-group">
-            <label>Утасны Дугаар:</label>
-            <div class="search-container">
-              <input 
-                v-model="phoneNumber"
-                placeholder="Утасны дугаар оруулах"
-                @input="debouncedSearchUser"
-              />
-              <button @click="searchUser" class="btn-search">Хайх</button>
-              <button @click="clearData" class="btn-search">Цэвэрлэх</button>
+        <div class="top">
+          <div class="search-section">
+            <div class="search-group">
+              <label>Утасны Дугаар:</label>
+              <div class="search-container">
+                <input 
+                  v-model="phoneNumber"
+                  placeholder="Утасны дугаар оруулах"
+                  @input="debouncedSearchUser"
+                  autofocus
+                />
+                <button @click="searchUser" class="btn-search">Хайх</button>
+                <button @click="clearData" class="btn-search">Цэвэрлэх</button>
+              </div>
+            </div>
+            
+            <div class="search-group">
+              <label>Трак Код:</label>
+              <div class="search-container">
+                <input 
+                  v-model="trackingNumber"
+                  placeholder="Трак код оруулах"
+                  @keydown.enter="setDelivered"
+                  :disabled="!phoneNumber"
+                />
+                <button 
+                  @click="setDelivered" 
+                  class="btn-search"
+                  :disabled="!phoneNumber || !trackingNumber"
+                >
+                  Хүлээлгэж өгөх
+                </button>
+              </div>
             </div>
           </div>
           
-          <div class="search-group">
-            <label>Трак Код:</label>
-            <div class="search-container">
-              <input 
-                v-model="trackingNumber"
-                placeholder="Трак код оруулах"
-                @keydown.enter="setDelivered"
-                :disabled="!phoneNumber"
-              />
-              <button 
-                @click="setDelivered" 
-                class="btn-search"
-                :disabled="!phoneNumber || !trackingNumber"
-              >
-                Хүлээлгэж өгөх
-              </button>
-            </div>
-          </div>
-        </div>
-  
-        <div v-if="userCargos.length > 0" class="cargos-table-container">
-          <h2 class="user-name">{{ userCargosName }}</h2>
-          <h3 class="total-price" v-if="totalPrice > 0">Нийт Дүн: {{ numberWithCommas(totalPrice) }}₮</h3>
-            <div class="actions-container">
+          <div class="user-info-row">
+            <h3 class="user-name">{{ userCargosName }}</h3>
+            <h3 class="total-price" v-if="totalPrice > 0">Нийт Дүн: {{ numberWithCommas(totalPrice) }}₮</h3>
+            <h3 class="delivered-count" v-if="deliveredCount > 0">УБ-д ирсэн: {{ deliveredCount }}</h3>
             <button
                 @click="setAllDelivered" 
                 class="btn-deliver-all"
@@ -47,44 +49,47 @@
             >
                 Бүх Карго Авсан
             </button>
-            </div>
-                <table class="cargos-table">
-                    <thead>
-                    <tr>
-                        <th>Трак Код</th>
-                        <th>Нэр</th>
-                        <th>Төрөл</th>
-                        <th>Төлөв</th>
-                        <th>Үнэ</th>
-                        <th>Хүргэх салбар</th>
-                        <th>Сүүлийн Шинэчлэл</th>
-                        <th>Үйлдэл</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="cargo in sortedUserCargos" :key="cargo.id">
-                            <td>{{ cargo.trackingNumber }}</td>
-                            <td>{{ cargo.nickname }}</td>
-                            <td>{{ cargo.cargoType === 'NORMAL' ? 'Энгийн' : 'Шуурхай' }}</td>
-                            <td>{{ formatStatus(cargo.currentStatus) }}</td>
-                            <td>{{ cargo.price ? `${numberWithCommas(cargo.price)} ₮` : '-' }}</td>
-                            <td>{{ cargo.destinationLocation?.name || '-' }}</td>
-                            <td>{{ formatDate(getLatestDate(cargo)) }}</td>
-                            <td>
-                            <button 
-                                v-if="cargo.currentStatus === 'DELIVERED_TO_UB'"
-                                @click="setCargoDelivered(cargo)" 
-                                class="btn-delivered"
-                            >
-                                Авсан
-                            </button>
-                            <span v-else>{{ cargo.currentStatus === 'DELIVERED' ? 'Хүлээлгэж өгсөн' : '-' }}</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+          </div>
         </div>
+  
+        <div v-if="userCargos.length > 0" class="cargos-table-container">
+          <table class="cargos-table">
+              <thead>
+              <tr>
+                  <th>Трак Код</th>
+                  <th>Нэр</th>
+                  <th>Төрөл</th>
+                  <th>Төлөв</th>
+                  <th>Үнэ</th>
+                  <th>Хүргэх салбар</th>
+                  <th>Сүүлийн Шинэчлэл</th>
+                  <th>Үйлдэл</th>
+              </tr>
+              </thead>
+              <tbody class="table-body">
+                  <tr v-for="cargo in sortedUserCargos" :key="cargo.id">
+                      <td>{{ cargo.trackingNumber }}</td>
+                      <td>{{ cargo.nickname }}</td>
+                      <td>{{ cargo.cargoType === 'NORMAL' ? 'Энгийн' : 'Шуурхай' }}</td>
+                      <td>{{ formatStatus(cargo.currentStatus) }}</td>
+                      <td>{{ cargo.price ? `${numberWithCommas(cargo.price)} ₮` : '-' }}</td>
+                      <td>{{ cargo.destinationLocation?.name || '-' }}</td>
+                      <td>{{ formatDate(getLatestDate(cargo)) }}</td>
+                      <td>
+                      <button 
+                          v-if="cargo.currentStatus === 'DELIVERED_TO_UB'"
+                          @click="setCargoDelivered(cargo)" 
+                          class="btn-delivered"
+                      >
+                          Авсан
+                      </button>
+                      <span v-else>{{ cargo.currentStatus === 'DELIVERED' ? 'Хүлээлгэж өгсөн' : '-' }}</span>
+                      </td>
+                  </tr>
+              </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </template>
   
@@ -102,6 +107,13 @@
     return userCargos.value
       .filter(cargo => cargo.currentStatus === 'DELIVERED_TO_UB' && cargo.price)
       .reduce((sum, cargo) => sum + Number(cargo.price), 0)
+  })
+  
+  // Add computed property for delivered count
+  const deliveredCount = computed(() => {
+    return userCargos.value
+      .filter(cargo => cargo.currentStatus === 'DELIVERED_TO_UB')
+      .length
   })
   
   const hasDeliverableItems = computed(() => {
@@ -280,20 +292,15 @@ async function setDelivered() {
   </script>
   
 <style lang="scss" scoped>
-$primary-color: #1a73e8;
-$secondary-color: #4285f4;
-$background-color: #f8f9fa;
-$border-color: #e0e0e0;
-$text-color: #202124;
-$sidebar-width: 280px;
+ $primary-color: #1a73e8;
+ $secondary-color: #4285f4;
+ $background-color: #f8f9fa;
+ $border-color: #e0e0e0;
+ $text-color: #202124;
+ $danger-color: #dc3545;
+ $sidebar-width: 80px;
 
 // Mixins
-@mixin flex-center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 @mixin button-base {
     padding: 8px 16px;
     border-radius: 8px;
@@ -307,10 +314,19 @@ $sidebar-width: 280px;
     display: flex;
 
     .main-content {
+        position: relative;
         margin-left: $sidebar-width;
         width: calc(100% - #{$sidebar-width});
         background-color: $background-color;
     }
+}
+
+.top{
+  position: fixed;
+  width: calc(100% - #{$sidebar-width});
+  background-color: #F6F6F6;
+  height: 120px;
+  z-index: 10;
 }
 
 // Form Styles
@@ -335,79 +351,38 @@ $sidebar-width: 280px;
     }
 }
 
-.form-grid{
-    padding: 12px 1.5rem;
-    display: flex;
-    background-color: #F6F6F6;
-    border-bottom: 1px dashed #DBE0E0;
-    align-items: center;
-    gap: 1.5rem;
-    .form-group{
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    }
-}
-
-.cargo-type-options {
-    display: flex;
-
-    input[type="radio"] {
-        display: none;
-    &:checked + .radio-box {
-        color: #fff;
-        background-color: $primary-color;
-    }
-}
-
-    .radio-box {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s;
-        width: 7.5rem;
-        height: 2.5rem;
-        background-color: #fff;
-        .radio-label {
-            display: block;
-            text-align: center;
-            font-weight: 500;
-        }
-    }
-}
-
-input{
-    max-width: 15rem;
-    height: 2.5rem;
-    border-radius: 8px;
-    border: 1px solid $border-color;
-    color: $text-color;
-    padding: 8px;
-    background-color: #ffffff;
+.user-info-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  align-items: center;
+  margin: 0.5rem 1rem;
+  
+  .user-name {
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .total-price, .delivered-count {
+    font-weight: 500;
+    margin: 0;
+    justify-self: end;
+  }
+  
+  .btn-deliver-all {
+    justify-self: end;
+  }
 }
 
 // Table Styles
 .cargos-table-container {
+  margin-top: 120px;
   background-color: white;
   border-radius: 8px;
-  padding-top: 1rem;
-
-  .user-name{
-    margin: 0 1rem;
-    font-weight: 600;
-  }
-
-  .total-price{
-    margin: 1rem;
-    font-weight: 500;
-  }
 
   table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 16px;
 
   th, td {
       padding: 12px;
@@ -434,32 +409,6 @@ input{
     }
 }
 
-.btn-submit {
-    @include button-base;
-    background-color: $secondary-color;
-    color: white;
-
-    &:disabled {
-    background-color: $border-color;
-    cursor: not-allowed;
-    }
-}
-
-.btn-edit {
-    @include button-base;
-    background-color: transparent;
-    color: $primary-color;
-
-    &:hover {
-    filter: brightness(0.9)
-    }
-}
-
-// Reuse existing styles and add:
-.actions-container {
-    margin-bottom: 1rem;
-}
-
 .btn-delivered {
     @include button-base;
     background-color: #34A853;
@@ -471,14 +420,23 @@ input{
 }
 
 .btn-deliver-all {
-@include button-base;
+    @include button-base;
     background-color: #34A853;
     color: white;
-    margin: 0 0 0 1rem;
 
     &:hover {
         filter: brightness(0.9);
     }
+}
+
+input{
+    max-width: 15rem;
+    height: 2.5rem;
+    border-radius: 8px;
+    border: 1px solid $border-color;
+    color: $text-color;
+    padding: 8px;
+    background-color: #ffffff;
 }
 
 input:disabled {

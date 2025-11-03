@@ -296,7 +296,7 @@ $secondary-color: #4285f4;
 $background-color: #f8f9fa;
 $border-color: #e0e0e0;
 $text-color: #202124;
-$sidebar-width: 280px;
+$sidebar-width: 80px;
 
 // Mixins
 @mixin button-base {

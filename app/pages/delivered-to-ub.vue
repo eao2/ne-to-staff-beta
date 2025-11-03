@@ -2,103 +2,109 @@
   <div class="cargo-management">
     <SideBar />
     <div class="main-content">
-      <div class="search-section">
-        <div class="search-group">
-          <label>Утасны Дугаар:</label>
-          <div class="search-container">
+      <div class="top">
+        <div class="search-section">
+          <div class="search-group">
+            <label>Утасны Дугаар:</label>
+            <div class="search-container">
+              <input 
+                v-model="phoneNumber"
+                placeholder="Утасны дугаар оруулах"
+                @input="debouncedSearchUser"
+                autofocus
+              />
+              <button @click="searchUser" class="btn-search">Хайх</button>
+              <button @click="clearUserDataAll" class="btn-search">Цэвэрлэх</button>
+            </div>
+          </div>
+          
+          <div class="search-group">
+            <label>Захиалагчийн Нэр:</label>
             <input 
-              v-model="phoneNumber"
-              placeholder="Утасны дугаар оруулах"
-              @input="debouncedSearchUser"
-              autofocus
+              v-model="userData.name"
+              :disabled="isExistingUser"
+              placeholder="Захиалагчийн нэр"
             />
-            <button @click="searchUser" class="btn-search">Хайх</button>
-            <button @click="clearUserDataAll" class="btn-search">Цэвэрлэх</button>
           </div>
         </div>
+
+        <form
+          @submit.prevent
+          class="cargo-form">
+          <div class="form-section">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Төрөл:</label>
+                <div class="cargo-type-options">
+                  <input 
+                    id="normal"
+                    type="radio" 
+                    v-model="cargoData.cargoType" 
+                    value="NORMAL"
+                    tabindex="1"
+                    name="cargoType"
+                  />
+                  <label for="normal" class="radio-box">
+                    <span class="radio-label">Энгийн</span>
+                  </label>
+                  <input
+                    id="quick"
+                    type="radio" 
+                    v-model="cargoData.cargoType" 
+                    value="QUICK"
+                    tabindex="2"
+                    name="cargoType"
+                  />
+                  <label for="quick" class="radio-box">
+                    <span class="radio-label">Шуурхай</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Төлөх дүн:</label>
+                <input 
+                  type="number"
+                  v-model="cargoData.price"
+                  placeholder="Төлөх дүн оруулах"
+                  required
+                  @keydown.enter.prevent="$refs.trackingNumber.focus()"
+                  ref="cargoPrice"
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Трак Код:</label>
+                <input
+                  type="text"
+                  v-model="cargoData.trackingNumber"
+                  required
+                  placeholder="Трак код оруулах"
+                  @keydown.enter.prevent="submitCargo"
+                  ref="trackingNumber"
+                />
+              </div>
+              
+              <button 
+                type="submit"
+                class="btn-submit"
+                :disabled="!cargoData.trackingNumber"
+                @click="submitCargo"
+              >
+                Ачааны мэдээлэл нэмэх
+              </button>
+            </div>
+          </div>
+        </form>
         
-        <div class="search-group">
-          <label>Захиалагчийн Нэр:</label>
-          <input 
-            v-model="userData.name"
-            :disabled="isExistingUser"
-            placeholder="Захиалагчийн нэр"
-          />
+        <div class="user-info-row">
+          <h3 class="user-name">{{ userCargosName }}</h3>
+          <h3 class="total-price" v-if="totalPrice > 0">Нийт Дүн: {{ numberWithCommas(totalPrice) }}₮</h3>
+          <h3 class="delivered-count" v-if="deliveredCount > 0">УБ-д ирсэн: {{ deliveredCount }}</h3>
         </div>
       </div>
 
-      <form
-        @submit.prevent
-        class="cargo-form">
-        <div class="form-section">
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Төрөл:</label>
-              <div class="cargo-type-options">
-                <input 
-                  id="normal"
-                  type="radio" 
-                  v-model="cargoData.cargoType" 
-                  value="NORMAL"
-                  tabindex="1"
-                  name="cargoType"
-                />
-                <label for="normal" class="radio-box">
-                  <span class="radio-label">Энгийн</span>
-                </label>
-                <input
-                  id="quick"
-                  type="radio" 
-                  v-model="cargoData.cargoType" 
-                  value="QUICK"
-                  tabindex="2"
-                  name="cargoType"
-                />
-                <label for="quick" class="radio-box">
-                  <span class="radio-label">Шуурхай</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Төлөх дүн:</label>
-              <input 
-                type="number"
-                v-model="cargoData.price"
-                placeholder="Төлөх дүн оруулах"
-                required
-                @keydown.enter.prevent="$refs.trackingNumber.focus()"
-                ref="cargoPrice"
-              />
-            </div>
-
-            <div class="form-group">
-              <label>Трак Код:</label>
-              <input
-                type="text"
-                v-model="cargoData.trackingNumber"
-                required
-                placeholder="Трак код оруулах"
-                @keydown.enter.prevent="submitCargo"
-                ref="trackingNumber"
-              />
-            </div>
-            
-            <button 
-              type="submit"
-              class="btn-submit"
-              :disabled="!cargoData.trackingNumber"
-              @click="submitCargo"
-            >
-              Ачааны мэдээлэл нэмэх
-            </button>
-          </div>
-        </div>
-      </form>
-
       <div v-if="userCargos.length > 0" class="cargos-table-container">
-        <h2 class="user-name">{{ userCargosName }}</h2>
-        <h3 class="total-price" v-if="totalPrice > 0">Нийт Дүн: {{ numberWithCommas(totalPrice) }}₮</h3>
         <table class="cargos-table">
           <thead>
             <tr>
@@ -138,13 +144,13 @@
 </template>
 
 <style lang="scss" scoped>
-$primary-color: #1a73e8;
-$secondary-color: #4285f4;
-$background-color: #f8f9fa;
-$border-color: #e0e0e0;
-$text-color: #202124;
-$danger-color: #dc3545;
-$sidebar-width: 280px;
+ $primary-color: #1a73e8;
+ $secondary-color: #4285f4;
+ $background-color: #f8f9fa;
+ $border-color: #e0e0e0;
+ $text-color: #202124;
+ $danger-color: #dc3545;
+ $sidebar-width: 80px;
 
 // Mixins
 @mixin button-base {
@@ -160,10 +166,18 @@ $sidebar-width: 280px;
   display: flex;
 
   .main-content {
+    position: relative;
     margin-left: $sidebar-width;
     width: calc(100% - #{$sidebar-width});
     background-color: $background-color;
   }
+}
+
+.top{
+  position: fixed;
+  width: calc(100% - #{$sidebar-width});
+  background-color: #F6F6F6;
+  height: 180px;
 }
 
 // Form Styles
@@ -239,21 +253,36 @@ input{
   background-color: #ffffff;
 }
 
+.user-info-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  align-items: center;
+
+  margin: 1rem;
+  
+  .user-name {
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .stats-container {
+    display: flex;
+    gap: 1.5rem;
+    
+    .total-price, .delivered-count {
+      font-weight: 500;
+      margin: 0;
+    }
+  }
+}
+
 // Table Styles
 .cargos-table-container {
+  margin-top: 180px;
   background-color: white;
   border-radius: 8px;
-  padding-top: 1rem;
 
-  .user-name{
-    margin: 0 1rem;
-    font-weight: 600;
-  }
-
-  .total-price{
-    margin: 1rem;
-    font-weight: 500;
-  }
 
   table {
     width: 100%;
@@ -368,6 +397,13 @@ const totalPrice = computed(() => {
   return userCargos.value
     .filter(cargo => cargo.currentStatus === 'DELIVERED_TO_UB' && cargo.price)
     .reduce((sum, cargo) => sum + Number(cargo.price), 0)
+})
+
+// Add computed property for delivered count
+const deliveredCount = computed(() => {
+  return userCargos.value
+    .filter(cargo => cargo.currentStatus === 'DELIVERED_TO_UB')
+    .length
 })
 
 function numberWithCommas(x) {

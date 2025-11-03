@@ -208,7 +208,7 @@ $background-color: #f8f9fa;
 $border-color: #e0e0e0;
 $text-color: #202124;
 $danger-color: #dc3545;
-$sidebar-width: 280px;
+$sidebar-width: 80px;
 
 @mixin button-base {
   padding: 8px 16px;

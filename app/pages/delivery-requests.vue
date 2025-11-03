@@ -692,13 +692,13 @@ $warning: #F59E0B;
 $danger: #EF4444;
 $text-dark: #1F2937;
 $text-light: #6B7280;
-$sidebar-width: 280px;
+$sidebar-width: 80px;
 $primary-color: #1a73e8;
 $secondary-color: #4285f4;
 $background-color: #f8f9fa;
 $border-color: #e0e0e0;
 $text-color: #202124;
-$sidebar-width: 280px;
+$sidebar-width: 80px;
 
 
 // Mixins
